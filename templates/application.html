@@ -12,16 +12,16 @@
   </head>
   <body>
     <div class="container">
-      <br>
-      <a href="{{url_for('NewCategory')}}" class="btn btn-default">New Category</a>
-      <br><br>
+      {% block category_actions %}
+      {% endblock %}
+      
       <div class="row panel panel-default">
         {% if show_categories %}
         <div class="catalog-list col-xs-12 col-sm-3">
             <h2>Categories</h2>
             {% for category in categories %}
             <div class="catalog-item">
-              <a href="{{url_for('ShowCategoryItems', category_name=category.name)}}">
+              <a href="{{url_for('showCategory', category_name=category.name)}}">
                 {{category.name}}
               </a>
             </div>
