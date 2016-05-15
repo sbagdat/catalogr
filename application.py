@@ -1,12 +1,38 @@
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
+
+
+#Fake Categories
+catalog = {'name': 'Soccer', 'id': '1'}
+catalogs = [{'name': 'Soccer', 'id': '1'},
+            {'name': 'Basketball', 'id':'2'},
+            {'name':'Baseball', 'id':'3'},
+            {'name':'Snowboarding', 'id':'4'},
+            {'name':'Frisbee', 'id':'5'},
+            {'name':'Hockey', 'id':'6'}]
+
+#Fake Items
+item =  {'name':'Stick', 'description':'Description of hockey stick', 'price':'$5.99', 'id':'1', 'category_name':'Hockey'}
+items = [ {'name':'Stick', 'description':'Description of hockey stick', 'price':'$5.99', 'id':'1', 'category_name':'Hockey'},
+          {'name':'Goggles', 'description':'Description of goggles', 'price':'$12.99', 'id':'2', 'category_name':'Snowboarding'},
+          {'name':'Snowboard', 'description':'Description of snowboard', 'price':'$7.99', 'id':'3', 'category_name':'Snowboarding'},
+          {'name':'Two Shinguards', 'description':'Description of two shinguards', 'price':'$3.99', 'id':'4', 'category_name':'Soccer'},
+          {'name':'Shinguards', 'description':'Description of singuards', 'price':'$5.99', 'id':'5', 'category_name':'Soccer'},
+          {'name':'Frisbee', 'description':'Description of frisbee', 'price':'$32.99', 'id':'6', 'category_name':'Frisbee'},
+          {'name':'Bat', 'description':'Description of bat', 'price':'$4.99', 'id':'7', 'category_name':'Baseball'},
+          {'name':'Jersey', 'description':'Description of jersey', 'price':'$8.99', 'id':'8', 'category_name':'Soccer'},
+          {'name':'Soccer Cleats', 'description':'Description of soccer cleats', 'price':'$27.99', 'id':'9', 'category_name':'Soccer'}]
+
 
 @app.route('/')
 @app.route('/catalogs/')
 def Catalogs():
-    return """This is home page of the application. This page will be for
-              listing categories and items in it."""
+    """
+    This is home page of the application. This page will be for
+    listing categories and items in it.
+    """
+    return render_template('catalogs.html', catalogs=catalogs, latest=items)
 
 @app.route('/catalogs/new', methods=['GET', 'POST'])
 def NewCatalog():
