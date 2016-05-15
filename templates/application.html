@@ -13,16 +13,16 @@
   <body>
     <div class="container">
       <br>
-      <a href="{{url_for('NewCatalog')}}" class="btn btn-default">New Category</a>
+      <a href="{{url_for('NewCategory')}}" class="btn btn-default">New Category</a>
       <br><br>
       <div class="row panel panel-default">
         {% if show_categories %}
         <div class="catalog-list col-xs-12 col-sm-3">
             <h2>Categories</h2>
-            {% for catalog in catalogs %}
+            {% for category in categories %}
             <div class="catalog-item">
-              <a href="{{url_for('ShowCatalog', catalog_name=catalog.name)}}">
-                {{catalog.name}}
+              <a href="{{url_for('ShowCategoryItems', category_name=category.name)}}">
+                {{category.name}}
               </a>
             </div>
             {% endfor %}

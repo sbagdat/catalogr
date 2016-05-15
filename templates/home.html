@@ -4,7 +4,7 @@
       <h2>Latest Items</h2>
       {% for item in latest %}
         <div class="item">
-          <a href="{{url_for('ShowItem', catalog_name=item.category_name, item_name=item.name)}}">
+          <a href="{{url_for('ShowItem', category_name=item.category_name, item_name=item.name)}}">
             {{item.name}}
           </a>
           ({{item.category_name}})
