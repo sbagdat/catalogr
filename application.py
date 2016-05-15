@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
@@ -29,19 +29,42 @@ items = [ {'name':'Stick', 'description':'Description of hockey stick', 'price':
 @app.route('/catalogs/')
 def Catalogs():
     """
-    This is home page of the application. This page will be for
-    listing categories and items in it.
+    List all of the categories, and latest ten items
     """
-    return render_template('catalogs.html', catalogs=catalogs, latest=items)
+    return render_template('catalogs.html',
+                           catalogs=catalogs,
+                           latest=items,
+                           show_categories=True)
 
 @app.route('/catalogs/new', methods=['GET', 'POST'])
 def NewCatalog():
-    return "This page will be for creating a new category"
+    """
+    Allow users to create new category
+    """
+    if request.method == 'POST':
+        # Save the newly created category to the database
+        category_name = request.form['name']
+        # Fake it like saved to db
+        return redirect(url_for('Catalogs',
+                                catalogs=catalogs,
+                                latest=items,
+                                show_categories=True))
+    else:
+        # Show a form to create new category
+        return render_template('newcategory.html',
+                               show_categories=False)
 
 @app.route('/catalogs/<catalog_name>/')
 @app.route('/catalogs/<catalog_name>/items')
 def ShowCatalog(catalog_name):
-    return "This page will be for listing items in catalog %s" % catalog_name
+    """
+    List all items in the selected category
+    """
+    return render_template('catalog.html',
+                           category_name= catalog_name,
+                           catalogs=catalogs,
+                           items=items,
+                           show_categories=True)
 
 @app.route('/catalogs/<catalog_name>/edit', methods=['GET', 'POST'])
 def EditCatalog(catalog_name):
