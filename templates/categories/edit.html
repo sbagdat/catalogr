@@ -1,0 +1,20 @@
+{% extends 'application.html' %}
+
+{% block category_actions %}
+<br>
+<a href="{{url_for('newCategory')}}" class="btn btn-default">New Category</a>
+<br>
+<br>
+{% endblock %}
+
+
+{% block content %}
+    <div class="col-xs-12">
+      <h2>Edit Category</h2>
+      <form method="post">
+        <label for="name">Name:</label>
+        <input type='text' name='name' id="name" placeholder={{category.name}}>
+        <input type='submit' value='Edit'>
+      </form>
+  </div>
+{% endblock %}

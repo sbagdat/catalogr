@@ -1,0 +1,23 @@
+{% extends 'application.html' %}
+{% block content %}
+<h1>Edit {{item.name}}</h1>
+<div class="col-xs-12">
+  <form action="{{url_for('editItem', category_name=item.category_name, item_name=item.name)}}" method="post">
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input type='text' name='name' id="name" placeholder="{{item.name}}">
+    </div>
+    <div class="form-group">
+      <label for="description">Description:</label>
+      <textarea name='description' id="description">{{item.description}}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="price">Price:</label>
+      <input type='text' name='price' id="price" placeholder="{{item.price}}">
+    </div>
+    <div class="form-group">
+      <input type='submit' value='Edit'>
+    </div>
+  </form>
+</div>
+{% endblock %}

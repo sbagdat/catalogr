@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Catalog App</title>
+    <link rel="stylesheet"
+          href="{{url_for('static', filename='css/vendor/bootstrap.min.css')}}"
+          media="screen">
+    <link rel="stylesheet"
+          href="{{url_for('static', filename='css/home.css')}}"
+          media="screen">
+  </head>
+  <body>
+    <div class="container">
+      {% block category_actions %}
+      {% endblock %}
+      
+      <div class="row panel panel-default">
+        {% if show_categories %}
+        <div class="catalog-list col-xs-12 col-sm-3">
+            <h2>Categories</h2>
+            {% for category in categories %}
+            <div class="catalog-item">
+              <a href="{{url_for('showCategory', category_name=category.name)}}">
+                {{category.name}}
+              </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+    <script src="{{url_for('static', filename='js/vendor/jquery-2.2.3.min.js')}}">
+    </script>
+    <script src="{{url_for('static', filename='js/vendor/bootstrap.min.js')}}">
+    </script>
+  </body>
+</html>

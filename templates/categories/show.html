@@ -1,0 +1,24 @@
+{% extends 'application.html' %}
+
+{% block category_actions %}
+<br>
+<a href="{{url_for('newCategory')}}" class="btn btn-default">New Category</a>
+<a href="{{url_for('editCategory', category_name=category_name)}}" class="btn btn-default">Edit Category</a>
+<a href="{{url_for('deleteCategory', category_name=category_name)}}" class="btn btn-danger">Delete Category</a>
+<br>
+<br>
+{% endblock %}
+
+{% block content %}
+    <div class="latest-items col-xs-12 col-sm-9">
+      <h2>{{category_name}} Items</h2>
+      {% for item in items %}
+        <div class="item">
+          <a href="{{url_for('showItem', category_name=item.category_name, item_name=item.name)}}">
+            {{item.name}}
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
