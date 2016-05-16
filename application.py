@@ -1,6 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for
+from sqlalchemy     import create_engine
+from sqlalchemy.orm import sessionmaker
+from database_setup import Base, Category, Item
 
 app = Flask(__name__)
+
+engine = create_engine('sqlite:///catalogapp.db')
+Base.metadata.bind = engine
+
+DBSession = sessionmaker(bind=engine)
+session = DBSession()
 
 # Fake Categories
 category = {'name': 'Soccer', 'id': '1'}
