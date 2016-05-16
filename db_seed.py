@@ -11,37 +11,28 @@ session = DBSession()
 
 categories = [
     ['soccer',
-        [{'name':'Two Shinguards',
-           'description':'Description of two shinguards',
-           'price':'$3.99'},
-          {'name':'Shinguards',
-           'description':'Description of singuards',
-           'price':'$5.99'},
-          {'name':'Jersey',
-           'description':'Description of jersey',
-           'price':'$8.99'},
-          {'name':'Soccer Cleats',
-           'description':'Description of soccer cleats',
-           'price':'$27.99'}]],
+        [{'name':'two shinguards',
+           'description':'Description of two shinguards'},
+          {'name':'shinguards',
+           'description':'Description of singuards'},
+          {'name':'jersey',
+           'description':'Description of jersey'},
+          {'name':'soccer cleats',
+           'description':'Description of soccer cleats'}]],
     ['hockey',
-        [{'name':'Stick',
-          'description':'Description of hockey stick',
-         'price':'$5.99'}]],
+        [{'name':'stick',
+          'description':'Description of hockey stick'}]],
     ['snowboarding',
-        [{'name':'Goggles',
-          'description':'Description of goggles',
-          'price':'$12.99'},
-         {'name':'Snowboard',
-          'description':'Description of snowboard',
-          'price':'$7.99'}]],
+        [{'name':'goggles',
+          'description':'Description of goggles'},
+         {'name':'snowboard',
+          'description':'Description of snowboard'}]],
     ['frisbee',
-        [{'name':'Frisbee',
-          'description':'Description of frisbee',
-          'price':'$32.99'}]],
+        [{'name':'frisbee',
+          'description':'Description of frisbee'}]],
     ['baseball',
-        [{'name':'Bat',
-          'description':'Description of bat',
-          'price':'$4.99'}]]
+        [{'name':'bat',
+          'description':'Description of bat'}]]
 ]
 
 for category in categories:
@@ -52,7 +43,6 @@ for category in categories:
     for item in category[1]:
         current_item = Item(name=item['name'],
                             description=item['description'],
-                            price=item['price'],
                             category=current_category)
         session.add(current_item)
         session.commit()

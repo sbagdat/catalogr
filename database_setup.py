@@ -17,11 +17,10 @@ class Category(Base):
 class Item(Base):
   __tablename__   = 'items'
 
-  name          = Column(String(80), nullable=False)
+  name          = Column(String(80), nullable=False, primary_key=True)
   description   = Column(String(250))
-  price         = Column(String(8))
-  id            = Column(Integer, primary_key = True)
-  category_id = Column(Integer, ForeignKey('categories.id'))
+  id            = Column(Integer)
+  category_id = Column(Integer, ForeignKey('categories.id'), primary_key = True)
   category = relationship(Category)
 
 # create database and add tables and columns
