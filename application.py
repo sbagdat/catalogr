@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
-
 # Fake Categories
 category = {'name': 'Soccer', 'id': '1'}
 categories = [{'name': 'Soccer', 'id': '1'},
@@ -25,7 +24,7 @@ items = [ {'name':'Stick', 'description':'Description of hockey stick', 'price':
           {'name':'Soccer Cleats', 'description':'Description of soccer cleats', 'price':'$27.99', 'id':'9', 'category_name':'Soccer'}]
 
 @app.route('/')
-@app.route('/catalogs')
+@app.route('/catalogs/')
 def home():
     """
     List all of the categories, and latest ten items
@@ -35,13 +34,13 @@ def home():
                            latest=items,
                            show_categories=True)
 
-@app.route('/catalogs/new', methods=['GET', 'POST'])
+@app.route('/catalogs/new/', methods=['GET', 'POST'])
 def newCategory():
     """
     Allow logged users to create new category
     """
-    new_category = {'name': 'Empty'}
     if request.method == 'POST':
+        new_category = category
         # Save category
         # Fake it as saved
         return redirect(url_for('showCategory', category_name=request.form['name']))
@@ -50,10 +49,10 @@ def newCategory():
         return render_template('categories/new.html',
                                show_categories=False)
 
-@app.route('/catalogs/<category_name>/edit', methods=['GET', 'POST'])
+@app.route('/catalogs/<category_name>/edit/', methods=['GET', 'POST'])
 def editCategory(category_name):
         """
-        Allow users to edit a category
+        Allow logged users to edit a category
         """
         category_to_edit = category
         if request.method == 'POST':
@@ -66,10 +65,10 @@ def editCategory(category_name):
                                    category=category_to_edit,
                                    show_categories=False)
 
-@app.route('/catalogs/<category_name>/delete', methods=['GET', 'POST'])
+@app.route('/catalogs/<category_name>/delete/', methods=['GET', 'POST'])
 def deleteCategory(category_name):
     """
-    Allow users to delete a category (and items in it)
+    Allow logged users to delete a category (and items in it)
     """
     category_to_delete = category
     items_to_delete = items
@@ -84,7 +83,7 @@ def deleteCategory(category_name):
                                show_categories=False)
 
 @app.route('/catalogs/<category_name>/')
-@app.route('/catalogs/<category_name>/items')
+@app.route('/catalogs/<category_name>/items/')
 def showCategory(category_name):
     """
     List all items in the selected category
@@ -95,21 +94,61 @@ def showCategory(category_name):
                             items=items,
                             show_categories=True)
 
-@app.route('/catalogs/`<category_name>`/items/new', methods=['GET', 'POST'])
+@app.route('/catalogs/<category_name>/items/new/', methods=['GET', 'POST'])
 def newItem(category_name):
-    return "This page will be for creating new item in category %s." % category_name
+    """
+    Allow logged users to create an item
+    """
+    if request.method == 'POST':
+        # Create category
+        # Fake it as saved
+        return redirect(url_for('showItem', category_name=category_name, item_name=request.form['name']))
+    else:
+        # Show a form to edit category
+        return render_template('items/new.html',
+                               category_name=category_name,
+                               params={'name':'', 'description':'', 'price':''},
+                               show_categories=False)
 
-@app.route('/catalogs/<category_name>/items/<item_name>')
+@app.route('/catalogs/<category_name>/items/<item_name>/')
 def showItem(category_name, item_name):
-    return "This page will show item %s, from category %s." % (item_name, category_name)
+    """
+    Show details of selected item
+    """
+    item_to_show = item
+    return render_template('items/show.html', item=item_to_show)
 
-@app.route('/catalogs/<category_name>/items/<item_name>/edit', methods=['GET', 'POST'])
+@app.route('/catalogs/<category_name>/items/<item_name>/edit/', methods=['GET', 'POST'])
 def editItem(category_name, item_name):
-    return "This page will be for editing item %s, from category %s." % (item_name, category_name)
+    """
+    Allow logged users to edit an item
+    """
+    item_to_edit = item
+    if request.method == 'POST':
+        # Update item
+        # Fake it as updated
+        return redirect(url_for('showItem', category_name=category_name, item_name=request.form['name']))
+    else:
+        # Show a form to edit category
+        return render_template('items/edit.html',
+                               item=item_to_edit,
+                               show_categories=False)
 
-@app.route('/catalogs/<category_name>/items/<item_name>/delete', methods=['GET', 'POST'])
+@app.route('/catalogs/<category_name>/items/<item_name>/delete/', methods=['GET', 'POST'])
 def deleteItem(category_name, item_name):
-    return "This page will be for deleting item %s, from category %s." % (item_name, category_name)
+    """
+    Allow logged users to delete an item
+    """
+    item_to_delete = item
+    if request.method == 'POST':
+        # Delete category and related items
+        # Fake it as they are deleted
+        return redirect(url_for('showCategory', category_name=category_name))
+    else:
+        # Show a confirmation to delete
+        return render_template('items/delete.html',
+                               item=item_to_delete,
+                               show_categories=False)
 
 if __name__ == '__main__':
     app.debug = True
