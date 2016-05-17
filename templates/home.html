@@ -23,7 +23,7 @@
           <a href="{{url_for('showItem',
                              category_name=item.category.name,
                              item_name=item.name)}}">
-            {{item.name}}
+            {{item.name.capitalize()}}
           </a>
           <span class="text-muted">
             <em>

@@ -1,13 +1,25 @@
 {% extends 'application.html' %}
 {% block content %}
-<h1>{{item.name}}</h1>
 <div class="col-xs-12">
+  <h1>{{item.name.capitalize()}}</h1>
   <p>
     {{item.description}}
   </p>
 </div>
 <div class="col-xs-12">
-  <a href="{{url_for('editItem', category_name=item.category_name, item_name=item.name)}}" class="btn btn-default">Edit</a>
-  <a href="{{url_for('deleteItem', category_name=item.category_name, item_name=item.name)}}" class="btn btn-danger">Delete</a>
+  <a href="{{url_for('editItem',
+                     category_name=item.category.name,
+                     item_name=item.name)}}"
+     class="btn
+            btn-default">
+    Edit
+  </a>
+  <a href="{{url_for('deleteItem',
+                     category_name=item.category.name,
+                     item_name=item.name)}}"
+     class="btn
+            btn-danger">
+    Delete
+  </a>
 </div>
 {% endblock %}
