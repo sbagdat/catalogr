@@ -1,8 +1,32 @@
 {% extends 'application.html' %}
 {% block content %}
-  <h1> Are you sure you want to delete {{category_name}}?</h1>
-  <form action="{{url_for('deleteCategory', category_name=category_name)}}" method = 'post'>
-    <input type='submit', value = 'Delete'>
-  </form>
-  <a href = "{{ url_for('showCategory', category_name = category_name)}}" class="btn btn-default"> Cancel </a>
+  <div class="latest-items
+              col-xs-12">
+    <h2>
+      Confirm to Delete "{{category_name.capitalize()}}" Category
+    </h2>
+    <p>
+      This operation will delete the current category, and all the items
+      inside that category. Are you sure you want to delete category
+      <strong>{{category_name.capitalize()}}</strong> and all the items in it?
+    </p>
+    <form action="{{url_for('deleteCategory', category_name=category_name)}}"
+          method = 'post'
+          class="form-horizontal">
+      <div class="form-group">
+        <!-- Fix it by css -->
+        &nbsp;&nbsp;&nbsp;
+        <button type="submit"
+                class="btn
+                       btn-danger">
+          I am sure, delete <u><strong>them</strong></u>!
+        </button>
+        <a href = "{{ url_for('showCategory', category_name = category_name)}}"
+           class="btn
+                  btn-success">
+          Oh, no! Let me think again.
+        </a>
+      </div>
+    </form>
+  </div>
 {% endblock %}
