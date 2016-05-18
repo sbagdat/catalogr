@@ -87,6 +87,11 @@ def user_allowed_to_edit(thing):
             thing.user_id == login_session['user_id'])
 
 
+@app.context_processor
+def inject_user():
+    return dict(user_logged_in=user_allowed_to_browse())
+
+
 # Create anti-forgery state token
 @app.route('/login')
 def showLogin():
@@ -216,7 +221,6 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-
         response = make_response(
             json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'

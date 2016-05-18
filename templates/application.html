@@ -16,9 +16,17 @@
   </head>
   <body>
     <div class="container">
-      {% block category_actions %}
-      {% endblock %}
+      {% if user_logged_in %}
+        <a href="/gdisconnect">Logout</a>
+      {% else %}
+        <a href="/login">Log In</a>
+        <a href="/login">Sign In</a>
+      {% endif %}
 
+      {% if user_logged_in %}
+        {% block category_actions %}
+        {% endblock %}
+      {% endif %}
 
       <div class="">
         {{get_flashed_messages()}}
