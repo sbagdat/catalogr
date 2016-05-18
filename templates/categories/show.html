@@ -26,14 +26,15 @@
       <h2>
         {{category_name.capitalize()}} Items
       </h2>
-      <a href="{{url_for('newItem',
-                         category_name=category_name)}}"
-         class="btn
-                btn-default"
-         role="button">
-        New Item
-      </a>
-
+      {% if user_logged_in %}
+        <a href="{{url_for('newItem',
+                           category_name=category_name)}}"
+           class="btn
+                  btn-default"
+           role="button">
+          New Item
+        </a>
+      {% endif %}
       {% for item in filtered_items %}
         <div class="item">
           <a href="{{url_for('showItem',

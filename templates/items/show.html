@@ -1,25 +1,27 @@
 {% extends 'application.html' %}
 {% block content %}
-<div class="col-xs-12">
-  <h1>{{item.name.capitalize()}}</h1>
-  <p>
-    {{item.description}}
-  </p>
-</div>
-<div class="col-xs-12">
-  <a href="{{url_for('editItem',
-                     category_name=item.category.name,
-                     item_name=item.name)}}"
-     class="btn
-            btn-default">
-    Edit
-  </a>
-  <a href="{{url_for('deleteItem',
-                     category_name=item.category.name,
-                     item_name=item.name)}}"
-     class="btn
-            btn-danger">
-    Delete
-  </a>
-</div>
+  <div class="col-xs-12">
+    <h1>{{item.name.capitalize()}}</h1>
+    <p>
+      {{item.description}}
+    </p>
+  </div>
+  {% if user_logged_in %}
+    <div class="col-xs-12">
+      <a href="{{url_for('editItem',
+                         category_name=item.category.name,
+                         item_name=item.name)}}"
+         class="btn
+                btn-default">
+        Edit
+      </a>
+      <a href="{{url_for('deleteItem',
+                         category_name=item.category.name,
+                         item_name=item.name)}}"
+         class="btn
+                btn-danger">
+        Delete
+      </a>
+    </div>
+  {% endif %}
 {% endblock %}

@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import IntegrityError
-from database_setup import Base, Category, Item
+from database_setup import Base, Category, Item, User
 from flask import session as login_session
 import random
 import string
@@ -26,6 +26,7 @@ CLIENT_ID = json.loads(
 APPLICATION_NAME = "Catalog Application"
 
 
+# Category Helper Methods
 def category(category_name):
     return session.query(Category).filter_by(name=category_name).one()
 
@@ -34,6 +35,7 @@ def categories():
     return session.query(Category).order_by('name')
 
 
+# Item Helper Methods
 def item(name, category_name):
     return session.query(Item).filter_by(
         name=name,
@@ -51,6 +53,43 @@ def items(count='all', category_name=None):
     else:
         # return all items
         return session.query(Item).order_by('name')
+
+
+# User Helper Functions
+def createUser(login_session):
+    newUser = User(name=login_session['username'], email=login_session[
+                   'email'], picture=login_session['picture'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
+
+
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
+
+
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
+
+
+def user_allowed_to_browse():
+    return 'username' in login_session
+
+
+def user_allowed_to_edit(thing):
+    return ('user_id' in login_session and
+            thing.user_id == login_session['user_id'])
+
+
+@app.context_processor
+def inject_user():
+    return dict(user_logged_in=user_allowed_to_browse())
 
 
 # Create anti-forgery state token
@@ -133,6 +172,12 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    # see if user exists, if it doesn't make a new one
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -176,7 +221,6 @@ def gdisconnect():
         response.headers['Content-Type'] = 'application/json'
         return response
     else:
-
         response = make_response(
             json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
@@ -215,14 +259,18 @@ def newCategory():
     """
     Allow logged users to create new category
     """
-    # if not logged in, redirect to home
-    if 'username' not in login_session:
-        return redirect('/login')
+    # check user logged in
+    if not user_allowed_to_browse():
+        flash("You need to login!")
+        return redirect('login')
+
     if request.method == 'POST':
         new_category_name = request.form['name'].strip().lower()
         if new_category_name:
             # if not blank, save it to the database
-            new_category = Category(name=new_category_name)
+            new_category = Category(
+                name=new_category_name,
+                user=getUserInfo(login_session['user_id']))
             session.add(new_category)
             try:
                 session.commit()
@@ -255,10 +303,19 @@ def editCategory(category_name):
     """
     Allow logged users to edit a category
     """
-    # if not logged in, redirect to home
-    if 'username' not in login_session:
-        return redirect('/login')
+    # check user logged in
+    if not user_allowed_to_browse():
+        flash("You need to login!")
+        return redirect('login')
+
     category_to_edit = category(category_name)
+
+    # check user is owner of the category
+    if not user_allowed_to_edit(category_to_edit):
+        flash("""You are not authorized to edit this category but you \
+              can always create yours and then edit them if you want.""")
+        return redirect('/')
+
     if request.method == 'POST':
         edited_category_name = request.form['name'].strip().lower()
         if edited_category_name:
@@ -301,11 +358,29 @@ def deleteCategory(category_name):
     """
     Allow logged users to delete a category (and items in it)
     """
-    # if not logged in, redirect to home
-    if 'username' not in login_session:
-        return redirect('/login')
+    # check user logged in
+    if not user_allowed_to_browse():
+        flash("You need to login!")
+        return redirect('login')
+
     category_to_delete = category(category_name)
+
+    # check user is owner of the category
+    if not user_allowed_to_edit(category_to_delete):
+        flash("""You are not authorized to delete this category but you \
+              can always create yours and then delete them if you want.""")
+        return redirect('/')
+
     items_to_delete = items(category_name=category_name)
+    # check user is owner of the all items in that category
+    for item_to_delete in items_to_delete:
+        if not user_allowed_to_edit(item_to_delete):
+            flash("""sYou are the owner of this category. But some items \
+                  in that category doesn't belong to you. So, you \
+                  can't delete the whole category. Maybe, you can try \
+                  to delete your own items.""")
+            return redirect('/')
+
     if request.method == 'POST':
         # Delete category and related items
         for item_to_delete in items_to_delete:
@@ -313,7 +388,7 @@ def deleteCategory(category_name):
         session.delete(category_to_delete)
         try:
             session.commit()
-            return redirect(url_for('home'))
+            return redirect('/')
         except:
             session.rollback()
             return "An unknown error occured!"
@@ -338,9 +413,11 @@ def newItem(category_name):
     """
     Allow logged users to create an item
     """
-    # if not logged in, redirect to home
-    if 'username' not in login_session:
-        return redirect('/login')
+    # check user logged in
+    if not user_allowed_to_browse():
+        flash("You need to login!")
+        return redirect('login')
+
     if request.method == 'POST':
         new_item_name = request.form['name'].strip().lower()
         new_item_description = request.form['description'].strip()
@@ -349,7 +426,8 @@ def newItem(category_name):
             new_item = Item(
                 name=new_item_name,
                 description=new_item_description,
-                category=category(category_name))
+                category=category(category_name),
+                user=getUserInfo(login_session['user_id']))
             session.add(new_item)
             try:
                 session.commit()
@@ -401,10 +479,18 @@ def editItem(category_name, item_name):
     """
     Allow logged users to edit an item
     """
-    # if not logged in, redirect to home
-    if 'username' not in login_session:
-        return redirect('/login')
+    # check user logged in
+    if not user_allowed_to_browse():
+        flash("You need to login!")
+        return redirect('login')
+
     item_to_edit = item(item_name, category_name)
+
+    if not user_allowed_to_edit(item_to_edit):
+        flash("""You are not authorized to edit this item but you \
+              can always create yours and then edit them if you want.""")
+        return redirect('/')
+
     if request.method == 'POST':
         edited_item_name = request.form['name'].strip().lower()
         edited_item_description = request.form['description'].strip()
@@ -465,10 +551,17 @@ def deleteItem(category_name, item_name):
     """
     Allow logged users to delete an item
     """
-    # if not logged in, redirect to home
-    if 'username' not in login_session:
-        return redirect('/login')
+    if not user_allowed_to_browse():
+        flash("You need to login!")
+        return redirect('login')
+
     item_to_delete = item(item_name, category_name)
+
+    if not user_allowed_to_edit(item_to_delete):
+        flash("""You are not authorized to delete this item but you \
+              can always create yours and then edit them if you want.""")
+        return redirect('/')
+
     if request.method == 'POST':
         session.delete(item_to_delete)
         try:
