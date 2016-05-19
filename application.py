@@ -185,10 +185,11 @@ def gconnect():
     output += '<img src="'
     output += login_session['picture']
     output += """
-        " style = "width: 300px; height: 300px;border-radius: 150px;
-         -webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+        " style = "width: 80px; height: 80px;border-radius: 50%;
+         -webkit-border-radius: 50%;-moz-border-radius: 50%;"> '
          """
-    flash("you are now logged in as %s" % login_session['username'])
+    flash("Welcome, you are now logged in as %s." % login_session['username'])
+    flash("success")
     print "done!"
     return output
 
@@ -262,6 +263,7 @@ def newCategory():
     # check user logged in
     if not user_allowed_to_browse():
         flash("You need to login!")
+        flash("danger")
         return redirect('login')
 
     if request.method == 'POST':
@@ -274,6 +276,8 @@ def newCategory():
             session.add(new_category)
             try:
                 session.commit()
+                flash("Category is successfully created.")
+                flash("success")
                 return redirect(
                     url_for('showCategory',
                             category_name=new_category_name))
@@ -306,14 +310,16 @@ def editCategory(category_name):
     # check user logged in
     if not user_allowed_to_browse():
         flash("You need to login!")
+        flash("danger")
         return redirect('login')
 
     category_to_edit = category(category_name)
 
     # check user is owner of the category
     if not user_allowed_to_edit(category_to_edit):
-        flash("""You are not authorized to edit this category but you \
+        flash("""You are not authorized to edit this category, but you \
               can always create yours and then edit them if you want.""")
+        flash("danger")
         return redirect('/')
 
     if request.method == 'POST':
@@ -324,6 +330,8 @@ def editCategory(category_name):
             session.add(category_to_edit)
             try:
                 session.commit()
+                flash("Category is successfully updated.")
+                flash('success')
                 return redirect(
                     url_for(
                         'showCategory',
@@ -361,24 +369,27 @@ def deleteCategory(category_name):
     # check user logged in
     if not user_allowed_to_browse():
         flash("You need to login!")
+        flash("danger")
         return redirect('login')
 
     category_to_delete = category(category_name)
 
     # check user is owner of the category
     if not user_allowed_to_edit(category_to_delete):
-        flash("""You are not authorized to delete this category but you \
+        flash("""You are not authorized to delete this category, but you \
               can always create yours and then delete them if you want.""")
+        flash("danger")
         return redirect('/')
 
     items_to_delete = items(category_name=category_name)
     # check user is owner of the all items in that category
     for item_to_delete in items_to_delete:
         if not user_allowed_to_edit(item_to_delete):
-            flash("""sYou are the owner of this category. But some items \
-                  in that category doesn't belong to you. So, you \
+            flash("""You are the owner of this category, but some items \
+                  in that category don't belong to you. So, you \
                   can't delete the whole category. Maybe, you can try \
                   to delete your own items.""")
+            flash("danger")
             return redirect('/')
 
     if request.method == 'POST':
@@ -388,6 +399,8 @@ def deleteCategory(category_name):
         session.delete(category_to_delete)
         try:
             session.commit()
+            flash("Category is successfully deleted.")
+            flash('success')
             return redirect('/')
         except:
             session.rollback()
@@ -416,6 +429,7 @@ def newItem(category_name):
     # check user logged in
     if not user_allowed_to_browse():
         flash("You need to login!")
+        flash("danger")
         return redirect('login')
 
     if request.method == 'POST':
@@ -431,6 +445,8 @@ def newItem(category_name):
             session.add(new_item)
             try:
                 session.commit()
+                flash("Item is successfully created.")
+                flash('success')
                 return redirect(
                     url_for(
                         'showItem',
@@ -482,13 +498,15 @@ def editItem(category_name, item_name):
     # check user logged in
     if not user_allowed_to_browse():
         flash("You need to login!")
+        flash("danger")
         return redirect('login')
 
     item_to_edit = item(item_name, category_name)
 
     if not user_allowed_to_edit(item_to_edit):
-        flash("""You are not authorized to edit this item but you \
+        flash("""You are not authorized to edit this item, but you \
               can always create yours and then edit them if you want.""")
+        flash("danger")
         return redirect('/')
 
     if request.method == 'POST':
@@ -500,6 +518,8 @@ def editItem(category_name, item_name):
             session.add(item_to_edit)
             try:
                 session.commit()
+                flash("Item is successfully updated.")
+                flash('success')
                 return redirect(
                     url_for(
                         'showItem',
@@ -553,19 +573,23 @@ def deleteItem(category_name, item_name):
     """
     if not user_allowed_to_browse():
         flash("You need to login!")
+        flash('danger')
         return redirect('login')
 
     item_to_delete = item(item_name, category_name)
 
     if not user_allowed_to_edit(item_to_delete):
-        flash("""You are not authorized to delete this item but you \
+        flash("""You are not authorized to delete this item, but you \
               can always create yours and then edit them if you want.""")
+        flash("danger")
         return redirect('/')
 
     if request.method == 'POST':
         session.delete(item_to_delete)
         try:
             session.commit()
+            flash("Item is successfully deleteed.")
+            flash('success')
             return redirect(
                 url_for('showCategory', category_name=category_name))
         except:

@@ -1,7 +1,7 @@
 {% extends 'application.html' %}
 {% block content %}
-<h1>New Item</h1>
 <div class="col-xs-12">
+  <h2>New Item</h2>
   <form action="{{url_for('newItem',
                           category_name=category_name)}}"
         method="post"
@@ -39,7 +39,9 @@
       {% endif %}
     </div>
     <div class="form-group">
-      <input type='submit' value='Create'>
+      <button type="submit" name="button" class="btn btn-default">
+        Create Item
+      </button>
     </div>
   </form>
 </div>

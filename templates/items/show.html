@@ -8,11 +8,12 @@
   </div>
   {% if user_logged_in %}
     <div class="col-xs-12">
+      <hr>
       <a href="{{url_for('editItem',
                          category_name=item.category.name,
                          item_name=item.name)}}"
          class="btn
-                btn-default">
+                btn-success">
         Edit
       </a>
       <a href="{{url_for('deleteItem',

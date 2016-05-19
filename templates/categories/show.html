@@ -4,11 +4,11 @@
   <div class="row category-actions">
     <div class="col-xs-12">
       <a href="{{url_for('newCategory')}}"
-         class="btn btn-default">
+         class="btn btn-success">
         New Category
       </a>
       <a href="{{url_for('editCategory', category_name=category_name)}}"
-         class="btn btn-default">
+         class="btn btn-success">
         Edit Category
       </a>
       <a href="{{url_for('deleteCategory', category_name=category_name)}}"
@@ -25,16 +25,16 @@
                 col-sm-9">
       <h2>
         {{category_name.capitalize()}} Items
-      </h2>
       {% if user_logged_in %}
         <a href="{{url_for('newItem',
                            category_name=category_name)}}"
            class="btn
                   btn-default"
            role="button">
-          New Item
+          <strong>+</strong>
         </a>
       {% endif %}
+    </h2>
       {% for item in filtered_items %}
         <div class="item">
           <a href="{{url_for('showItem',
