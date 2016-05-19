@@ -1,3 +1,9 @@
+"""
+    Catalogr
+    ~~~~~~
+    An item catalog example application written with Flask and sqlite3.
+"""
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -21,55 +27,32 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+# Google+ client id and application name
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "Catalog Application"
 
 
-# Category Helper Methods
-def category(category_name):
-    return session.query(Category).filter_by(name=category_name).one()
-
-
-def categories():
-    return session.query(Category).order_by('name')
-
-
-# Item Helper Methods
-def item(name, category_name):
-    return session.query(Item).filter_by(
-        name=name,
-        category_id=category(category_name).id).one()
-
-
-def items(count='all', category_name=None):
-    if count == 'latest':
-        return session.query(Item).order_by('id DESC').limit(10)
-    elif category_name:
-        current_category = category(category_name)
-        filtered_items = session.query(Item).filter_by(
-            category_id=current_category.id)
-        return filtered_items.order_by('name')
-    else:
-        # return all items
-        return session.query(Item).order_by('name')
-
-
-# User Helper Functions
+# -- User Helper Functions -- #
+# Create new user and return its id
 def createUser(login_session):
-    newUser = User(name=login_session['username'], email=login_session[
-                   'email'], picture=login_session['picture'])
+    newUser = User(
+        name=login_session['username'],
+        email=login_session['email'],
+        picture=login_session['picture'])
     session.add(newUser)
     session.commit()
     user = session.query(User).filter_by(email=login_session['email']).one()
     return user.id
 
 
+# Find user with an id and return the user
 def getUserInfo(user_id):
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
 
+# Find user with an email and return the user
 def getUserID(email):
     try:
         user = session.query(User).filter_by(email=email).one()
@@ -78,23 +61,62 @@ def getUserID(email):
         return None
 
 
+# Check any user logged in
 def user_allowed_to_browse():
     return 'username' in login_session
 
 
+# Check user owner of a thing(category or item)
 def user_allowed_to_edit(thing):
     return ('user_id' in login_session and
             thing.user_id == login_session['user_id'])
 
 
+# Inject user_logged_in in templates to check any user logged in
 @app.context_processor
-def inject_user():
+def inject_user_logged_in():
     return dict(user_logged_in=user_allowed_to_browse())
 
 
-# Create anti-forgery state token
+# -- Category Helper Functions -- #
+# Find a category using its name and return it
+def category(category_name):
+    return session.query(Category).filter_by(name=category_name).one()
+
+
+# Return all categories in the database
+def categories():
+    return session.query(Category).order_by('name')
+
+
+# -- Category Helper Functions -- #
+# Find an item using its name and category name, then return it
+def item(name, category_name):
+    return session.query(Item).filter_by(
+        name=name,
+        category_id=category(category_name).id).one()
+
+
+# Filter items with given parameters(how many, their category)
+def items(count='all', category_name=None):
+    # Latest 10 items
+    if count == 'latest':
+        return session.query(Item).order_by('id DESC').limit(10)
+    elif category_name:
+        current_category = category(category_name)
+        filtered_items = session.query(Item).filter_by(
+            category_id=current_category.id)
+        # Items filtered by their category names
+        return filtered_items.order_by('name')
+    else:
+        # All items in the database
+        return session.query(Item).order_by('name')
+
+
 @app.route('/login')
 def showLogin():
+    """Open login home page contains google+ button"""
+    # Create anti-forgery state token
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
     login_session['state'] = state
@@ -103,6 +125,7 @@ def showLogin():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """Connect google+ account."""
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -196,6 +219,7 @@ def gconnect():
 
 @app.route('/gdisconnect')
 def gdisconnect():
+    """Log out from google+."""
     access_token = login_session['access_token']
     print 'In gdisconnect access token is %s', access_token
     print 'User name is: '
@@ -232,7 +256,7 @@ def gdisconnect():
 @app.route('/catalogs/')
 def home():
     """
-    List all of the categories, and latest ten items
+    List all of the categories, and latest items
     """
     return render_template(
         'home.html',
@@ -285,7 +309,7 @@ def newCategory():
                 # name must be unique, so re-render form with this error
                 session.rollback()
                 errors = {'name': "already exists, try different name"}
-                # save non-unique value to show which value exists
+                # show user-entered non-unique value in the form
                 values = {'name': request.form['name']}
                 return render_template(
                     'categories/new.html',
@@ -325,7 +349,7 @@ def editCategory(category_name):
     if request.method == 'POST':
         edited_category_name = request.form['name'].strip().lower()
         if edited_category_name:
-                # if not blank, update it
+            # if not blank, update it
             category_to_edit.name = edited_category_name
             session.add(category_to_edit)
             try:
@@ -340,7 +364,7 @@ def editCategory(category_name):
                 # name must be unique, so re-render form with this error
                 session.rollback()
                 errors = {'name': "already exists, try different name"}
-                # save non-unique value to show which value exists
+                # show user-entered non-unique value in the form
                 values = {'name': request.form['name']}
                 return render_template(
                     'categories/edit.html',
@@ -355,7 +379,7 @@ def editCategory(category_name):
                 category=category_to_edit,
                 errors=errors)
     else:
-        # Show a form to edit category
+        # Show a form to edit a category
         return render_template(
             'categories/edit.html',
             category=category_to_edit)
@@ -467,6 +491,7 @@ def newItem(category_name):
                         item_name=new_item_name))
         else:
             errors = {}
+            # store user-entered data to show them in re-rendered form
             params = {'name': '', 'description': ''}
             if new_item_name:
                 params['name'] = new_item_name
@@ -484,7 +509,7 @@ def newItem(category_name):
                 errors=errors,
                 params=params)
     else:
-        # Show a form to edit category
+        # Show a form to create new item
         return render_template(
             'items/new.html',
             category_name=category_name,
@@ -506,6 +531,7 @@ def editItem(category_name, item_name):
 
     item_to_edit = item(item_name, category_name)
 
+    # check user is owner of the item
     if not user_allowed_to_edit(item_to_edit):
         flash("""You are not authorized to edit this item, but you \
               can always create yours and then edit them if you want.""")
@@ -513,6 +539,7 @@ def editItem(category_name, item_name):
         return redirect('/')
 
     if request.method == 'POST':
+        # Update item
         edited_item_name = request.form['name'].strip().lower()
         edited_item_description = request.form['description'].strip()
         if edited_item_name and edited_item_description:
@@ -529,6 +556,7 @@ def editItem(category_name, item_name):
                         category_name=category_name,
                         item_name=edited_item_name))
             except IntegrityError:
+                # Item name is non-uniqueI
                 session.rollback()
                 errors = {'name': 'another item has same name'}
                 params = {'name': edited_item_name,
@@ -541,6 +569,7 @@ def editItem(category_name, item_name):
                     params=params)
         else:
             errors = {}
+            # store user-entered data to show them in re-rendered form
             params = {'name': '', 'description': ''}
             if edited_item_name:
                 params['name'] = edited_item_name
@@ -558,7 +587,7 @@ def editItem(category_name, item_name):
                                    errors=errors,
                                    params=params)
     else:
-        # Show a form to edit category
+        # Show a form to edit item
         return render_template(
             'items/edit.html',
             category_name=category_name,
@@ -574,6 +603,7 @@ def deleteItem(category_name, item_name):
     """
     Allow logged users to delete an item
     """
+    # check user logged in
     if not user_allowed_to_browse():
         flash("You need to login!")
         flash('danger')
@@ -581,6 +611,7 @@ def deleteItem(category_name, item_name):
 
     item_to_delete = item(item_name, category_name)
 
+    # check user is towner of the item
     if not user_allowed_to_edit(item_to_delete):
         flash("""You are not authorized to delete this item, but you \
               can always create yours and then edit them if you want.""")
@@ -588,6 +619,7 @@ def deleteItem(category_name, item_name):
         return redirect('/')
 
     if request.method == 'POST':
+        # Delete item
         session.delete(item_to_delete)
         try:
             session.commit()
@@ -606,19 +638,21 @@ def deleteItem(category_name, item_name):
             item_name=item_name)
 
 
-# JSON API for Catalogs
+# JSON API for catalogs
 @app.route('/catalogs/JSON')
 def CatalogsJSON():
     json_categories = categories()
     return jsonify(Categories=[c.serialize for c in json_categories])
 
 
+# JSON API for catalog
 @app.route('/catalogs/<category_name>/items/JSON')
 def CatalogItemsJSON(category_name):
     json_items = items(category_name=category_name)
     return jsonify(CategoryItems=[i.serialize for i in json_items])
 
 
+# JSON API for item
 @app.route('/catalogs/<category_name>/items/<item_name>/JSON')
 def ItemJSON(category_name, item_name):
     json_item = item(item_name, category_name)

@@ -28,8 +28,7 @@ class Category(Base):
         """Return object data in easily serializeable format"""
         return {
             'id': self.id,
-            'name': self.name,
-        }
+            'name': self.name, }
 
 
 class Item(Base):
@@ -49,8 +48,7 @@ class Item(Base):
         return {
             'id': self.id,
             'name': self.name,
-            'description': self.description,
-        }
+            'description': self.description, }
 
 
 # create database and add tables and columns
