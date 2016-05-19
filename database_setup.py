@@ -23,17 +23,34 @@ class Category(Base):
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(User)
 
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id': self.id,
+            'name': self.name,
+        }
+
 
 class Item(Base):
     __tablename__ = 'items'
-    id = Column(Integer)
-    name = Column(String(250), nullable=False, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250), nullable=False)
     description = Column(String(750), nullable=False)
     category_id = Column(
-        Integer, ForeignKey('categories.id'), primary_key=True)
+        Integer, ForeignKey('categories.id'))
     category = relationship(Category)
     user_id = Column(Integer, ForeignKey('users.id'))
     user = relationship(User)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+        }
 
 
 # create database and add tables and columns

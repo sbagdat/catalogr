@@ -10,7 +10,7 @@ from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
 import json
-from flask import make_response
+from flask import make_response, jsonify
 import requests
 
 app = Flask(__name__)
@@ -601,6 +601,26 @@ def deleteItem(category_name, item_name):
             'items/delete.html',
             category_name=category_name,
             item_name=item_name)
+
+
+# JSON API for Catalogs
+@app.route('/catalogs/JSON')
+def CatalogsJSON():
+    json_categories = categories()
+    return jsonify(Categories=[c.serialize for c in json_categories])
+
+
+@app.route('/catalogs/<category_name>/items/JSON')
+def CatalogItemsJSON(category_name):
+    json_items = items(category_name=category_name)
+    return jsonify(CategoryItems=[i.serialize for i in json_items])
+
+
+@app.route('/catalogs/<category_name>/items/<item_name>/JSON')
+def ItemJSON(category_name, item_name):
+    json_item = item(item_name, category_name)
+    return jsonify(CategoryItem=json_item.serialize)
+
 
 if __name__ == '__main__':
     app.secret_key = 'iamsosecret'
