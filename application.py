@@ -437,13 +437,26 @@ def newItem(category_name):
         new_item_description = request.form['description'].strip()
         if new_item_name and new_item_description:
             # if not blank, save to database
-            new_item = Item(
-                name=new_item_name,
-                description=new_item_description,
-                category=category(category_name),
-                user=getUserInfo(login_session['user_id']))
-            session.add(new_item)
             try:
+                # if same item in that category, re-render with error
+                item(name=new_item_name, category_name=category_name)
+                errors = {
+                    'name': 'another item has same name, and same category'}
+                params = {
+                    'name': new_item_name,
+                    'description': new_item_description}
+                return render_template(
+                        'items/new.html',
+                        category_name=category_name,
+                        errors=errors,
+                        params=params)
+            except:
+                new_item = Item(
+                    name=new_item_name,
+                    description=new_item_description,
+                    category=category(category_name),
+                    user=getUserInfo(login_session['user_id']))
+                session.add(new_item)
                 session.commit()
                 flash("Item is successfully created.")
                 flash('success')
@@ -452,16 +465,6 @@ def newItem(category_name):
                         'showItem',
                         category_name=category_name,
                         item_name=new_item_name))
-            except IntegrityError:
-                session.rollback()
-                errors = {'name': 'another item has same name'}
-                params = {'name': new_item_name,
-                          'description': new_item_description}
-                return render_template(
-                    'items/new.html',
-                    category_name=category_name,
-                    errors=errors,
-                    params=params)
         else:
             errors = {}
             params = {'name': '', 'description': ''}
