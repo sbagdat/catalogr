@@ -1,5 +1,4 @@
 .DS_Store
 *.pyc
 catalogapp.db
-todo.txt
 client_secrets.json
