@@ -19,6 +19,10 @@ It provides:
 * Google+ Client Secrets(client_secrets.json)
 
 ## Usage
+* Install dependencies
+```
+  pip install -r requirements.txt
+```
 * Download (or clone) the [repository](https://github.com/sbagdat/catalogr)
 * To create database:
 ```
